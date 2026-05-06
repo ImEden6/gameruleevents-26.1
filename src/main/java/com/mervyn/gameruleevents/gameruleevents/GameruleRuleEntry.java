@@ -13,6 +13,7 @@ public record GameruleRuleEntry(
 ) {
     public static GameruleRuleEntry fromJson(JsonObject obj) {
         if (obj == null) {
+            GameruleActionDispatcher.logWarning("Skipping null gamerule rule entry.");
             return null;
         }
 
@@ -22,6 +23,7 @@ public record GameruleRuleEntry(
         }
 
         if (gameruleId == null || gameruleId.isEmpty()) {
+            GameruleActionDispatcher.logWarning("Skipping gamerule rule entry with missing/empty 'gamerule' field.");
             return null;
         }
 
@@ -37,8 +39,9 @@ public record GameruleRuleEntry(
                 : GameruleWhenPredicate.ANY;
         GameruleAudience audience = GameruleAudience.fromJson(obj, "'" + id + "' (" + gameruleId + ")");
 
-        GameruleRuleActions actions = GameruleRuleActions.fromJson(obj);
+        GameruleRuleActions actions = GameruleRuleActions.fromJson(obj, "'" + id + "' (" + gameruleId + ")");
         if (actions == null) {
+            GameruleActionDispatcher.logWarning("Skipping rule '" + id + "' (" + gameruleId + ") because it has no valid actions.");
             return null;
         }
 

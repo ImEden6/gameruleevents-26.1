@@ -14,7 +14,7 @@ public record GameruleRuleActions(
         List<GameruleActionbarAction> actionbarActions,
         List<GameruleCommandAction> commandActions
 ) {
-    public static GameruleRuleActions fromJson(JsonObject obj) {
+    public static GameruleRuleActions fromJson(JsonObject obj, String ruleRef) {
         if (obj == null) {
             return null;
         }
@@ -29,6 +29,7 @@ public record GameruleRuleActions(
             JsonArray array = obj.getAsJsonArray("actions");
             for (JsonElement element : array) {
                 if (!element.isJsonObject()) {
+                    GameruleActionDispatcher.logWarning("Rule " + ruleRef + " has non-object action entry. Skipping it.");
                     continue;
                 }
                 JsonObject action = element.getAsJsonObject();
@@ -68,9 +69,12 @@ public record GameruleRuleActions(
                         }
                     }
                     default -> {
+                        GameruleActionDispatcher.logWarning("Rule " + ruleRef + " has unknown action type '" + type + "'. Skipping it.");
                     }
                 }
             }
+        } else {
+            GameruleActionDispatcher.logWarning("Rule " + ruleRef + " is missing 'actions' array. Skipping it.");
         }
 
         if (titles.isEmpty() && sounds.isEmpty() && chats.isEmpty() && actionbars.isEmpty() && commands.isEmpty()) {

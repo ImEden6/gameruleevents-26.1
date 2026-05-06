@@ -2,8 +2,10 @@ package com.mervyn.gameruleevents.gameruleevents;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class GameruleActionDispatcher {
     private static volatile Map<String, List<GameruleRuleEntry>> rulesByGamerule = Collections.emptyMap();
+    private static final Set<String> knownGameruleIds = resolveKnownGameruleIds();
     private static final Map<String, String> lastValuesByRule = new ConcurrentHashMap<>();
     private static final Map<String, Long> cooldownState = new ConcurrentHashMap<>();
     private static final AtomicInteger reloadWarnings = new AtomicInteger();
@@ -22,6 +25,11 @@ public class GameruleActionDispatcher {
 
     static void updateRulesIndex(Map<String, List<GameruleRuleEntry>> index) {
         rulesByGamerule = index != null ? index : Collections.emptyMap();
+        for (String gameruleId : rulesByGamerule.keySet()) {
+            if (!knownGameruleIds.isEmpty() && !knownGameruleIds.contains(gameruleId)) {
+                logWarning("Unknown gamerule id '" + gameruleId + "' in loaded rules. Rule remains active but may never trigger.");
+            }
+        }
         GameruleEvents.LOGGER.info("Loaded {} gamerule event rule groups", rulesByGamerule.size());
     }
 
@@ -150,6 +158,29 @@ public class GameruleActionDispatcher {
     }
 
     public record ReloadDiagnostics(int warnings, int errors) {
+    }
+
+    private static Set<String> resolveKnownGameruleIds() {
+        Set<String> ids = new HashSet<>();
+        try {
+            Class<?> gameRulesClass = Class.forName("net.minecraft.world.level.GameRules");
+            java.lang.reflect.Field field = gameRulesClass.getDeclaredField("GAME_RULE_TYPES");
+            field.setAccessible(true);
+            Object raw = field.get(null);
+            if (raw instanceof Map<?, ?> map) {
+                for (Object key : map.keySet()) {
+                    try {
+                        Object id = key.getClass().getMethod("getId").invoke(key);
+                        if (id != null) {
+                            ids.add(id.toString());
+                        }
+                    } catch (ReflectiveOperationException ignored) {
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return Set.copyOf(ids);
     }
 }
 
