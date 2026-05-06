@@ -1,0 +1,14 @@
+{
+  "itemGroup.gameruleevents": "Example Mod Tab",
+  "block.gameruleevents.example_block": "Example Block",
+  "item.gameruleevents.example_item": "Example Item",
+
+  "gameruleevents.configuration.title": "Gamerule Events Configs",
+  "gameruleevents.configuration.section.gameruleevents.common.toml": "Gamerule Events Configs",
+  "gameruleevents.configuration.section.gameruleevents.common.toml.title": "Gamerule Events Configs",
+  "gameruleevents.configuration.items": "Item List",
+  "gameruleevents.configuration.logDirtBlock": "Log Dirt Block",
+  "gameruleevents.configuration.magicNumberIntroduction": "Magic Number Text",
+  "gameruleevents.configuration.magicNumber": "Magic Number",
+  "gameruleevents.title.daylight_off": "Daylight cycle disabled"
+}

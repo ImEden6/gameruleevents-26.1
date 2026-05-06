@@ -1,0 +1,25 @@
+{
+  "rules": [
+    {
+      "gamerule": "minecraft:doDaylightCycle",
+      "when": { "equals": "false" },
+      "actions": [
+        {
+          "type": "broadcast_title",
+          "title": { "translate": "gameruleevents.title.daylight_off" },
+          "subtitle": { "text": "Time is frozen." },
+          "fadeIn": 10,
+          "stay": 40,
+          "fadeOut": 10
+        },
+        {
+          "type": "broadcast_sound",
+          "sound": "minecraft:block.note_block.pling",
+          "volume": 1.0,
+          "pitch": 1.0
+        }
+      ]
+    }
+  ]
+}
+

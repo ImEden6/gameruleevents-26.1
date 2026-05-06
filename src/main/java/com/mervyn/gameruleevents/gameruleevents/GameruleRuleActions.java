@@ -1,0 +1,60 @@
+package com.mervyn.gameruleevents.gameruleevents;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+public record GameruleRuleActions(List<GameruleTitleAction> titleActions, List<GameruleSoundAction> soundActions) {
+    public static GameruleRuleActions fromJson(JsonObject obj) {
+        if (obj == null) {
+            return null;
+        }
+
+        List<GameruleTitleAction> titles = new ArrayList<>();
+        List<GameruleSoundAction> sounds = new ArrayList<>();
+
+        if (obj.has("actions") && obj.get("actions").isJsonArray()) {
+            JsonArray array = obj.getAsJsonArray("actions");
+            for (JsonElement element : array) {
+                if (!element.isJsonObject()) {
+                    continue;
+                }
+                JsonObject action = element.getAsJsonObject();
+                String type = action.has("type") && action.get("type").isJsonPrimitive()
+                        ? action.getAsJsonPrimitive("type").getAsString()
+                        : "";
+
+                switch (type) {
+                    case "broadcast_title" -> {
+                        GameruleTitleAction title = GameruleTitleAction.fromJson(action);
+                        if (title != null) {
+                            titles.add(title);
+                        }
+                    }
+                    case "broadcast_sound" -> {
+                        GameruleSoundAction sound = GameruleSoundAction.fromJson(action);
+                        if (sound != null) {
+                            sounds.add(sound);
+                        }
+                    }
+                    default -> {
+                    }
+                }
+            }
+        }
+
+        if (titles.isEmpty() && sounds.isEmpty()) {
+            return null;
+        }
+
+        return new GameruleRuleActions(List.copyOf(titles), List.copyOf(sounds));
+    }
+
+    public boolean isEmpty() {
+        return titleActions.isEmpty() && soundActions.isEmpty();
+    }
+}
+
