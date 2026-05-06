@@ -2,12 +2,12 @@
   "rules": [
     {
       "id": "daylight-off-notify",
-      "gamerule": "minecraft:doDaylightCycle",
+      "gamerule": "minecraft:advance_time",
       "priority": 100,
       "cooldown_ticks": 40,
       "stop_after": true,
       "audience": "all",
-      "when": { "equals": "false", "changed": true },
+      "when": { "any": true },
       "actions": [
         {
           "type": "broadcast_title",

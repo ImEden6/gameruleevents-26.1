@@ -6,6 +6,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 
 public record GameruleSoundAction(Identifier soundId, float volume, float pitch) {
@@ -27,13 +28,23 @@ public record GameruleSoundAction(Identifier soundId, float volume, float pitch)
 
     public void play(ServerPlayer player, GameruleMatchContext context) {
         Level level = player.level();
-        SoundEvent sound = level.registryAccess()
+        var optionalSound = level.registryAccess()
                 .lookupOrThrow(net.minecraft.core.registries.Registries.SOUND_EVENT)
-                .get(soundId).map(net.minecraft.core.Holder::value).orElse(null);
+                .get(soundId);
+        SoundEvent sound = optionalSound.map(net.minecraft.core.Holder::value).orElse(null);
         if (sound == null) {
             sound = SoundEvents.NOTE_BLOCK_PLING.value();
         }
-        player.playSound(sound, volume, pitch);
+        level.playSound(
+                null,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                sound,
+                SoundSource.MASTER,
+                volume,
+                pitch
+        );
     }
 }
 
