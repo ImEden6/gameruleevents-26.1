@@ -120,7 +120,7 @@ The datapack schema uses an `actions[]` array. Supported action `type`s:
 
 ## Installation
 
-Gamerule Events targets NeoForge **26.1** (Minecraft **26.1**) or later.
+Gamerule Events targets NeoForge **26.1.x** (Minecraft **26.1.x**) or later.
 
 ## License
 
