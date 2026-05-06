@@ -25,7 +25,7 @@ public record GameruleSoundAction(Identifier soundId, float volume, float pitch)
         return new GameruleSoundAction(Identifier.parse(sound), volume, pitch);
     }
 
-    public void play(ServerPlayer player) {
+    public void play(ServerPlayer player, GameruleMatchContext context) {
         Level level = player.level();
         SoundEvent sound = level.registryAccess()
                 .lookupOrThrow(net.minecraft.core.registries.Registries.SOUND_EVENT)

@@ -3,24 +3,23 @@ package com.mervyn.gameruleevents.gameruleevents;
 import com.google.gson.JsonObject;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.server.level.ServerPlayer;
 
-public record GameruleTitleAction(Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
+public record GameruleTitleAction(JsonObject titleTemplate, JsonObject subtitleTemplate, int fadeIn, int stay, int fadeOut) {
     public static GameruleTitleAction fromJson(JsonObject obj) {
         if (obj == null) {
             return null;
         }
 
-        Component title = null;
-        Component subtitle = null;
+        JsonObject title = null;
+        JsonObject subtitle = null;
 
         if (obj.has("title") && obj.get("title").isJsonObject()) {
-            title = ComponentSerialization.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, obj.getAsJsonObject("title")).result().orElse(null);
+            title = obj.getAsJsonObject("title").deepCopy();
         }
 
         if (obj.has("subtitle") && obj.get("subtitle").isJsonObject()) {
-            subtitle = ComponentSerialization.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, obj.getAsJsonObject("subtitle")).result().orElse(null);
+            subtitle = obj.getAsJsonObject("subtitle").deepCopy();
         }
 
         if (title == null && subtitle == null) {
@@ -34,7 +33,9 @@ public record GameruleTitleAction(Component title, Component subtitle, int fadeI
         return new GameruleTitleAction(title, subtitle, fadeIn, stay, fadeOut);
     }
 
-    public void send(ServerPlayer player) {
+    public void send(ServerPlayer player, GameruleMatchContext context) {
+        Component title = PlaceholderUtil.componentFromTemplate(titleTemplate, context, player);
+        Component subtitle = PlaceholderUtil.componentFromTemplate(subtitleTemplate, context, player);
         if (title != null || subtitle != null) {
             player.connection.send(
                     new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(title != null ? title : Component.empty())

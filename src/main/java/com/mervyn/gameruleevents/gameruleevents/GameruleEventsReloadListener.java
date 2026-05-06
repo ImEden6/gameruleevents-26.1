@@ -1,6 +1,7 @@
 package com.mervyn.gameruleevents.gameruleevents;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class GameruleEventsReloadListener extends SimplePreparableReloadListener
 
     @Override
     protected Map<Identifier, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+        GameruleActionDispatcher.beginReloadDiagnostics();
         Map<Identifier, JsonElement> map = new HashMap<>();
         net.minecraft.resources.FileToIdConverter converter = net.minecraft.resources.FileToIdConverter.json("gamerule_events");
         for (Map.Entry<Identifier, net.minecraft.server.packs.resources.Resource> entry : converter.listMatchingResources(resourceManager).entrySet()) {
@@ -76,9 +78,13 @@ public class GameruleEventsReloadListener extends SimplePreparableReloadListener
                 GameruleActionDispatcher.logError("Failed to parse gamerule_events file " + id + ": " + e.getMessage());
             }
         }
+        for (List<GameruleRuleEntry> entries : byRule.values()) {
+            entries.sort(Comparator.comparingInt(GameruleRuleEntry::priority).reversed());
+        }
 
         this.rulesByGamerule = Map.copyOf(byRule);
         GameruleActionDispatcher.updateRulesIndex(this.rulesByGamerule);
+        GameruleActionDispatcher.finishReloadDiagnostics();
     }
 }
 

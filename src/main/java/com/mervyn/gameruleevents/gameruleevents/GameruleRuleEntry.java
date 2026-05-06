@@ -1,9 +1,16 @@
 package com.mervyn.gameruleevents.gameruleevents;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-
-public record GameruleRuleEntry(String gameruleId, String equalsValue, boolean any, GameruleRuleActions actions) {
+public record GameruleRuleEntry(
+        String id,
+        String gameruleId,
+        int priority,
+        boolean stopAfter,
+        int cooldownTicks,
+        GameruleWhenPredicate when,
+        GameruleAudience audience,
+        GameruleRuleActions actions
+) {
     public static GameruleRuleEntry fromJson(JsonObject obj) {
         if (obj == null) {
             return null;
@@ -18,37 +25,28 @@ public record GameruleRuleEntry(String gameruleId, String equalsValue, boolean a
             return null;
         }
 
-        String equalsValue = null;
-        boolean any = true;
-
-        if (obj.has("when") && obj.get("when").isJsonObject()) {
-            JsonObject when = obj.getAsJsonObject("when");
-            if (when.has("any") && when.get("any").isJsonPrimitive()) {
-                any = when.getAsJsonPrimitive("any").getAsBoolean();
-            }
-
-            if (when.has("equals")) {
-                JsonPrimitive primitive = when.getAsJsonPrimitive("equals");
-                if (primitive != null) {
-                    equalsValue = primitive.getAsString();
-                    any = false;
-                }
-            }
-        }
+        String id = obj.has("id") && obj.get("id").isJsonPrimitive() ? obj.getAsJsonPrimitive("id").getAsString() : gameruleId;
+        int priority = obj.has("priority") && obj.get("priority").isJsonPrimitive() ? obj.getAsJsonPrimitive("priority").getAsInt() : 0;
+        boolean stopAfter = obj.has("stop_after") && obj.get("stop_after").isJsonPrimitive()
+                && obj.getAsJsonPrimitive("stop_after").getAsBoolean();
+        int cooldownTicks = obj.has("cooldown_ticks") && obj.get("cooldown_ticks").isJsonPrimitive()
+                ? Math.max(0, obj.getAsJsonPrimitive("cooldown_ticks").getAsInt())
+                : 0;
+        GameruleWhenPredicate when = obj.has("when") && obj.get("when").isJsonObject()
+                ? GameruleWhenParser.parse(obj.getAsJsonObject("when"))
+                : GameruleWhenPredicate.ANY;
+        GameruleAudience audience = GameruleAudience.fromJson(obj, "'" + id + "' (" + gameruleId + ")");
 
         GameruleRuleActions actions = GameruleRuleActions.fromJson(obj);
         if (actions == null) {
             return null;
         }
 
-        return new GameruleRuleEntry(gameruleId, equalsValue, any, actions);
+        return new GameruleRuleEntry(id, gameruleId, priority, stopAfter, cooldownTicks, when, audience, actions);
     }
 
-    public boolean matches(String serializedValue) {
-        if (any) {
-            return true;
-        }
-        return equalsValue != null && equalsValue.equals(serializedValue);
+    public boolean matches(GameruleMatchContext context) {
+        return when.matches(context);
     }
 }
 

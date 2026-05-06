@@ -1,13 +1,18 @@
 {
   "rules": [
     {
+      "id": "daylight-off-notify",
       "gamerule": "minecraft:doDaylightCycle",
-      "when": { "equals": "false" },
+      "priority": 100,
+      "cooldown_ticks": 40,
+      "stop_after": true,
+      "audience": "all",
+      "when": { "equals": "false", "changed": true },
       "actions": [
         {
           "type": "broadcast_title",
           "title": { "translate": "gameruleevents.title.daylight_off" },
-          "subtitle": { "text": "Time is frozen." },
+          "subtitle": { "text": "Time is frozen. {gamerule}: {old} -> {new}" },
           "fadeIn": 10,
           "stay": 40,
           "fadeOut": 10
@@ -17,6 +22,19 @@
           "sound": "minecraft:block.note_block.pling",
           "volume": 1.0,
           "pitch": 1.0
+        },
+        {
+          "type": "broadcast_chat",
+          "message": { "text": "[GameruleEvents] {gamerule} changed to {new}" }
+        },
+        {
+          "type": "broadcast_actionbar",
+          "message": { "text": "Rule changed: {gamerule}" }
+        },
+        {
+          "type": "run_command",
+          "as": "server",
+          "command": "say doDaylightCycle is now {new}"
         }
       ]
     }

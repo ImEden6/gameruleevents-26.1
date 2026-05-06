@@ -10,5 +10,6 @@
   "gameruleevents.configuration.logDirtBlock": "Log Dirt Block",
   "gameruleevents.configuration.magicNumberIntroduction": "Magic Number Text",
   "gameruleevents.configuration.magicNumber": "Magic Number",
+  "gameruleevents.configuration.allowCommandActions": "Allow Command Actions",
   "gameruleevents.title.daylight_off": "Daylight cycle disabled"
 }
