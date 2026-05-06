@@ -122,6 +122,12 @@ The datapack schema uses an `actions[]` array. Supported action `type`s:
 
 Gamerule Events targets NeoForge **26.1.x** (Minecraft **26.1.x**) or later.
 
+### Dedicated server (client optional)
+
+- Put the mod JAR in the server `mods/` folder. Actions run on the server when gamerules change.
+- **Players do not need this mod on their client** to join the server or receive titles, chat, action bar, and sounds (those use normal vanilla packets). Mod metadata uses `displayTest="IGNORE_SERVER_VERSION"` so the mod list does not treat “server has mod, client does not” as a hard mismatch.
+- **Singleplayer / integrated server:** if you put the mod in your local `mods/` folder, it still loads on your game instance as usual—that is expected when you play with the mod yourself.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
